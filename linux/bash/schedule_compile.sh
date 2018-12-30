@@ -21,16 +21,17 @@ tmpfile=$(mktemp)
 EXENAME=${1:-cc1plus}
 SUFFIX=${2:-cc}
 # 4K-PAGES
-MEMAMOUNT=${3:-900000000}
+PMEMAMOUNT=${3:-900}
+let MEMAMOUNT=$PMEMAMOUNT*1024*1024
 PAGESIZE=$(getconf PAGESIZE)
 PAGELIMIT=$(expr $MEMAMOUNT / $PAGESIZE)
 PRGS=$(pgrep cc1plus)
 let PMEMSTOP=$PAGELIMIT*$PAGESIZE/1024/1024
 
 echo "Executable name is    : $EXENAME"
-echo "Mem stop limit is     : $MEMAMOUNT"
+echo "Mem stop limit is     : ${PMEMAMOUNT}M"
 echo "System's pagesize is  : $PAGESIZE"
-echo "Resulting pagelimit is: ${PMEMSTOP}M ($PAGELIMIT)"
+echo "Resulting pagelimit is: ${PMEMSTOP}M ($MEMAMOUNT B => $PAGELIMIT pages)"
 echo -e "Tempfile              : $tmpfile\n"
 
 for aproc in $PRGS; do
