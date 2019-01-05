@@ -19,20 +19,27 @@ declare -a procarr
 tmpfile=$(mktemp)
 
 EXENAME=${1:-cc1plus}
-SUFFIX=${2:-cc}
+EXE2NAME=${1:-cc1plus}
+SUFFIX=${2:-\\\(cc\\\|cpp\\\)}
 # 4K-PAGES
 PMEMAMOUNT=${3:-900}
 let MEMAMOUNT=$PMEMAMOUNT*1024*1024
 PAGESIZE=$(getconf PAGESIZE)
 PAGELIMIT=$(expr $MEMAMOUNT / $PAGESIZE)
-PRGS=$(pgrep $EXENAME)
+PRGS=""
+for aname in ${EXE2NAME//\|/ }; do
+	PRGS="${PRGS2} $(pgrep $EXENAME)"
+done
+
+#PRGS=$(pgrep $EXENAME)
 let PMEMSTOP=$PAGELIMIT*$PAGESIZE/1024/1024
 
-echo "Executable name is    : $EXENAME"
-echo "Mem stop limit is     : ${PMEMAMOUNT}M"
-echo "System's pagesize is  : $PAGESIZE"
-echo "Resulting pagelimit is: ${PMEMSTOP}M ($MEMAMOUNT B => $PAGELIMIT pages)"
-echo -e "Tempfile              : $tmpfile\n"
+echo "Executable name is     : $EXENAME"
+echo "Compile unit suffix is : ${SUFFIX//\\/}"
+echo "Mem stop limit is      : ${PMEMAMOUNT}M"
+echo "System's pagesize is   : $PAGESIZE"
+echo "Resulting pagelimit is : ${PMEMSTOP}M ($MEMAMOUNT B => $PAGELIMIT pages)"
+echo -e "Tempfile               : $tmpfile\n"
 
 for aproc in $PRGS; do
 	procut=$(cat /proc/$aproc/stat | cut -d ' ' -f 14)
